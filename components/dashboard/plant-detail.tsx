@@ -101,7 +101,9 @@ export function PlantDetailPage() {
     <DashboardAppShell currentPath="/list-tanaman">
       <div className="mx-auto max-w-5xl rounded-[32px] bg-[#F4F7F2] p-6 sm:p-8">
         <Breadcrumbs
-          items={plantDetailPage.breadcrumb.map((item) => item.label)}
+          items={plantDetailPage.breadcrumb.map(
+            (item: { label: string }) => item.label,
+          )}
         />
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <h1 className="text-[44px] font-black tracking-tight text-primary">
@@ -114,7 +116,7 @@ export function PlantDetailPage() {
         </div>
         <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_220px]">
           <div className="grid gap-5 sm:grid-cols-2">
-            {plantDetailPage.metrics.map((metric) => (
+            {plantDetailPage.metrics.map((metric: Metric) => (
               <SurfaceCard key={metric.label} className="p-6">
                 <div className="flex items-center gap-3">
                   <MetricIcon icon={metric.icon} tone={metric.tone} />
@@ -151,7 +153,7 @@ export function PlantDetailPage() {
             Riwayat
           </h2>
           <div className="mt-5 space-y-5">
-            {plantDetailPage.history.map((item) => (
+            {plantDetailPage.history.map((item: HistoryItem) => (
               <div
                 key={item.title}
                 className="flex flex-col gap-3 border-b border-primary/8 pb-5 last:border-b-0 last:pb-0 sm:flex-row sm:items-start sm:justify-between"
