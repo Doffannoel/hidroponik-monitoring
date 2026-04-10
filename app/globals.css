@@ -1,0 +1,102 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-surface text-primary antialiased;
+}
+
+.container-shell {
+  @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+}
+
+.section-space {
+  @apply py-16 sm:py-20;
+}
+
+.section-heading {
+  @apply text-3xl font-bold tracking-tight text-primary sm:text-4xl;
+}
+
+.card-base {
+  @apply rounded-[28px] border border-primary/5 bg-card shadow-soft;
+}
+
+.feature-card-reveal {
+  opacity: 0;
+  transform: translateY(28px) scale(0.96);
+  will-change: transform, opacity;
+}
+
+.feature-card-reveal.is-visible {
+  animation: feature-card-pop 0.72s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.testimonial-marquee {
+  position: relative;
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+}
+
+.testimonial-track {
+  display: flex;
+  width: max-content;
+  gap: 1.5rem;
+  animation: testimonial-scroll 26s linear infinite;
+}
+
+.testimonial-card {
+  width: min(24rem, calc(100vw - 2rem));
+  flex: 0 0 auto;
+}
+
+.testimonial-marquee:hover .testimonial-track {
+  animation-play-state: paused;
+}
+
+@keyframes testimonial-scroll {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(calc(-50% - 0.75rem));
+  }
+}
+
+@keyframes feature-card-pop {
+  0% {
+    opacity: 0;
+    transform: translateY(28px) scale(0.96);
+  }
+
+  65% {
+    opacity: 1;
+    transform: translateY(-4px) scale(1.015);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .feature-card-reveal {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+
+  .testimonial-track {
+    animation: none;
+  }
+}
