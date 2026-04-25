@@ -73,7 +73,7 @@ export function HeroSection() {
                   src="/images/hero-image.png"
                   alt="Kit hidroponik vertikal"
                   fill
-                  className="object-cover opacity-90"
+                  className="object-cover object-bottom opacity-90"
                   priority
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-primary/50 via-primary/5 to-transparent" />
