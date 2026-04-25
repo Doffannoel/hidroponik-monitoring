@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import { DashboardAppShell } from "@/components/dashboard/app-shell";
 import {
   Breadcrumbs,
@@ -6,6 +9,10 @@ import {
   SurfaceCard,
   ToneBadge,
 } from "@/components/dashboard/shared";
+import {
+  PlantFormModal,
+  type PlantFormValues,
+} from "@/components/dashboard/plant-form-modal";
 
 import {
   Beaker,
@@ -97,8 +104,28 @@ const plantDetailPage: PlantDetail = {
 };
 
 export function PlantDetailPage() {
+  const [title, setTitle] = useState(plantDetailPage.title);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <DashboardAppShell currentPath="/list-tanaman">
+      <PlantFormModal
+        open={isModalOpen}
+        mode="edit"
+        values={{
+          name: title,
+          kitId: "123456",
+          image: "/images/Lettuce.png",
+          plantedAt: "",
+          plantType: "Bayam",
+          fertilizer: "5ml",
+        }}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={(values: PlantFormValues) => {
+          setTitle(values.name || title);
+          setIsModalOpen(false);
+        }}
+      />
       <div className="mx-auto max-w-5xl rounded-[32px] bg-[#F4F7F2] p-6 sm:p-8">
         <Breadcrumbs
           items={plantDetailPage.breadcrumb.map(
@@ -107,11 +134,14 @@ export function PlantDetailPage() {
         />
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <h1 className="text-[44px] font-black tracking-tight text-primary">
-            {plantDetailPage.title}
+            {title}
           </h1>
           <div className="flex items-center gap-3 self-start md:self-auto">
             <ToneBadge tone="success">{plantDetailPage.status}</ToneBadge>
-            <KebabButton />
+            <KebabButton
+              ariaLabel="Edit plant"
+              onClick={() => setIsModalOpen(true)}
+            />
           </div>
         </div>
         <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_220px]">

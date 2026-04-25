@@ -1,6 +1,6 @@
 import clsx from 'clsx';
 import type { LucideIcon } from 'lucide-react';
-import { MoreVertical } from 'lucide-react';
+import { Pencil } from 'lucide-react';
 
 export function Breadcrumbs({ items }: { items: string[] }) {
   return <div className="mb-3 flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-primary/35">{items.map((item, index) => <div key={item + index} className="flex items-center gap-2">{index > 0 ? <span>•</span> : null}<span>{item}</span></div>)}</div>;
@@ -20,4 +20,21 @@ export function MetricIcon({ icon: Icon, tone = 'neutral' }: { icon: LucideIcon;
   return <span className={clsx('flex h-11 w-11 items-center justify-center rounded-full', tones[tone])}><Icon className="h-5 w-5" /></span>;
 }
 
-export function KebabButton() { return <button className="flex h-10 w-10 items-center justify-center rounded-full bg-black/5 text-primary/50 transition hover:bg-black/10 hover:text-primary"><MoreVertical className="h-4 w-4" /></button>; }
+export function KebabButton({
+  onClick,
+  ariaLabel = "Edit",
+}: {
+  onClick?: () => void;
+  ariaLabel?: string;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={ariaLabel}
+      onClick={onClick}
+      className="flex h-10 w-10 items-center justify-center rounded-full bg-black/5 text-primary/50 transition hover:bg-black/10 hover:text-primary"
+    >
+      <Pencil className="h-4 w-4" />
+    </button>
+  );
+}

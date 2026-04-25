@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
@@ -19,11 +20,15 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-primary/5 bg-surface/90 backdrop-blur">
       <div className="container-shell flex h-20 items-center justify-between gap-6">
-        <Link
-          href="/"
-          className="text-2xl font-extrabold tracking-tight text-primary"
-        >
-          Tikus Kota
+        <Link href="/" className="inline-flex items-center">
+          <Image
+            src="/images/logo.png"
+            alt="Logo perusahaan"
+            width={160}
+            height={160}
+            priority
+            className="h-30 w-auto object-contain"
+          />
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex">

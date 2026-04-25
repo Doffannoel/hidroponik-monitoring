@@ -30,17 +30,21 @@ export function DashboardOverview() {
                       : "neutral"
                 }
               />
-              <ToneBadge
-                tone={
-                  metric.tone === "danger"
-                    ? "danger"
-                    : metric.tone === "success"
-                      ? "success"
-                      : "neutral"
-                }
-              >
-                {metric.description}
-              </ToneBadge>
+              {!["Kontainer Aktif", "Hari Sejak Tanam"].includes(
+                metric.title,
+              ) && (
+                <ToneBadge
+                  tone={
+                    metric.tone === "danger"
+                      ? "danger"
+                      : metric.tone === "success"
+                        ? "success"
+                        : "neutral"
+                  }
+                >
+                  {metric.description}
+                </ToneBadge>
+              )}
             </div>
             <p className="mt-8 text-sm text-primary/60">{metric.title}</p>
             <div className="mt-1 flex items-end gap-2">
@@ -152,12 +156,12 @@ export function DashboardOverview() {
           <p className="mt-4 text-sm leading-7 text-white/75">
             {dashboardSummary.helperCard.description}
           </p>
-          <Link
+          {/* <Link
             href="/panduan"
             className="mt-10 inline-flex w-full items-center justify-center rounded-full bg-white px-6 py-4 text-sm font-semibold text-primary"
           >
             {dashboardSummary.helperCard.cta}
-          </Link>
+          </Link> */}
         </SurfaceCard>
       </div>
     </DashboardAppShell>

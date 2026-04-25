@@ -1,3 +1,6 @@
+"use client";
+
+import Image from "next/image";
 import Link from "next/link";
 import clsx from "clsx";
 import type { LucideIcon } from "lucide-react";
@@ -18,14 +21,16 @@ export function DashboardAppShell({
   return (
     <div className="min-h-screen bg-surface">
       <div className="mx-auto flex min-h-screen max-w-[1440px] bg-[#EEF2EC]">
-        <aside className="hidden w-[248px] border-r border-primary/6 bg-[#E9EEE7] px-7 py-8 lg:block">
-          <Link
-            href="/"
-            className="block text-[34px] font-black leading-[0.9] tracking-tight text-primary"
-          >
-            Tikus
-            <br />
-            Kota
+        <aside className="hidden w-[248px] border-r border-primary/6 bg-[#E9EEE7] px-7 py-5 lg:block">
+          <Link href="/" className="block w-fit">
+            <Image
+              src="/images/logo.png"
+              alt="Logo perusahaan"
+              width={180}
+              height={54}
+              priority
+              className="h-20 w-auto object-contain"
+            />
           </Link>
           <nav className="mt-12 space-y-3">
             {appNavItems.map(
@@ -75,13 +80,6 @@ export function DashboardAppShell({
               ))}
             </nav>
             <div className="flex items-center gap-3">
-              <button className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-primary shadow-sm">
-                <Bell className="h-4 w-4" />
-              </button>
-              <div className="hidden items-center gap-3 rounded-full bg-white px-4 py-3 text-sm text-primary/40 shadow-sm sm:flex">
-                <Search className="h-4 w-4 text-primary/60" />
-                <span>Cari data tanaman...</span>
-              </div>
               <button className="flex h-11 w-11 items-center justify-center rounded-full text-primary">
                 <UserCircle2 className="h-5 w-5" />
               </button>

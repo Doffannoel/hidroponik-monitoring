@@ -15,13 +15,19 @@ export default function AuthBrandPanel() {
 
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,26,5,0.45)_0%,rgba(16,52,7,0.68)_100%)]" />
 
-      <div className="relative z-10 flex w-full flex-col justify-between p-10 xl:p-14">
-        <div className="max-w-md py-12">
+      <div className="relative z-10 flex w-full flex-col justify-between p-8 xl:p-14">
+        <div className="max-w-md py-10">
           <div className="mb-8 flex items-center gap-4">
             <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/12 backdrop-blur-sm">
-              <span className="text-lg">🌱</span>
+              <Image
+                src="/images/logo.png"
+                alt="Logo Vertigrow"
+                width={50}
+                height={50}
+                className="h-30 w-auto object-contain"
+              />
             </div>
-            <p className="text-3xl font-extrabold tracking-tight">Tikus Kota</p>
+            <p className="text-3xl font-extrabold tracking-tight">Vertigrow</p>
           </div>
 
           <h1 className="text-5xl font-extrabold leading-[0.95] tracking-tight xl:text-6xl">

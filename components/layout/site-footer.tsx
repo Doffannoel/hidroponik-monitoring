@@ -5,9 +5,10 @@ export function SiteFooter() {
     <footer className="border-t border-primary/8 py-12">
       <div className="container-shell grid gap-10 lg:grid-cols-[1.3fr_0.7fr_0.7fr_0.7fr]">
         <div>
-          <h3 className="text-2xl font-extrabold text-primary">Tikus Kota</h3>
+          <h3 className="text-2xl font-extrabold text-primary">VertiGrow</h3>
           <p className="mt-4 max-w-md text-sm leading-7 text-textSoft">
-            Hidroponik cerdas yang dirancang khusus untuk warga kota yang ingin hidup lebih sehat dan hijau di lahan terbatas.
+            Hidroponik cerdas yang dirancang khusus untuk warga kota yang ingin
+            hidup lebih sehat dan hijau di lahan terbatas.
           </p>
         </div>
 
@@ -39,7 +40,7 @@ export function SiteFooter() {
         </div>
       </div>
       <div className="container-shell mt-10 border-t border-primary/8 pt-6 text-center text-xs text-textSoft">
-        © 2024 Tikus Kota. Hidroponik Cerdas untuk Kehidupan Urban.
+        © 2026 Vertigrow. Hidroponik Cerdas untuk Kehidupan Urban.
       </div>
     </footer>
   );

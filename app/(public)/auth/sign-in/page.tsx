@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import React, { useState } from "react";
 import AuthShell from "@/components/auth/AuthSell";
 import AuthBrandPanel from "@/components/auth/AuthBrandPanel";
 import AuthCard from "@/components/auth/AuthCard";
@@ -67,7 +67,7 @@ export default function SignIn() {
                 >
                   Syarat & Ketentuan
                 </Link>{" "}
-                Tikus Kota.
+                Innofarm
               </span>
             </label>
 

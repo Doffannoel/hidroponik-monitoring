@@ -12,7 +12,6 @@ import {
 
 export const navItems = [
   { label: "Beranda", href: "/" },
-  { label: "Panduan", href: "/panduan" },
   { label: "Dashboard", href: "/dashboard" },
 ];
 

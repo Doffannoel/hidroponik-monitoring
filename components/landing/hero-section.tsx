@@ -8,7 +8,8 @@ export function HeroSection() {
     <section className="section-space pt-10 sm:pt-14">
       <div className="container-shell">
         <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr]">
-          <div>{/*  */}
+          <div>
+            {/*  */}
             <h1 className="max-w-3xl text-5xl font-extrabold leading-[0.95] tracking-tight text-primary sm:text-6xl lg:text-7xl">
               Tanam Sayuran
               <br />
@@ -17,7 +18,8 @@ export function HeroSection() {
               <span className="text-primary/45">Tanpa Repot</span>
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-8 text-textSoft">
-              Kit hidroponik vertikal pintar dengan monitoring otomatis langsung dari smartphone kamu. Solusi berkebun masa depan untuk warga kota.
+              Kit hidroponik vertikal pintar dengan monitoring otomatis langsung
+              dari smartphone kamu. Solusi berkebun masa depan untuk warga kota.
             </p>
 
             <div className="mt-8 flex flex-col gap-4 sm:flex-row">
@@ -37,7 +39,10 @@ export function HeroSection() {
 
             <div className="mt-8 grid gap-3 sm:grid-cols-2">
               {heroBullets.map((bullet) => (
-                <div key={bullet} className="flex items-start gap-3 text-sm text-primary/80">
+                <div
+                  key={bullet}
+                  className="flex items-start gap-3 text-sm text-primary/80"
+                >
                   <CheckCircle2 className="mt-0.5 h-5 w-5 text-primarySoft" />
                   <span>{bullet}</span>
                 </div>
@@ -47,12 +52,16 @@ export function HeroSection() {
 
           <div className="relative">
             <div className="absolute left-0 top-8 z-10 w-44 rounded-[24px] bg-card p-5 shadow-soft">
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary/50">Live Status</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary/50">
+                Live Status
+              </p>
               <div className="mt-4 space-y-4">
                 {heroStats.map((stat) => (
                   <div key={stat.label}>
                     <p className="text-xs text-primary/50">{stat.label}</p>
-                    <p className="mt-1 text-lg font-bold text-primary">{stat.value}</p>
+                    <p className="mt-1 text-lg font-bold text-primary">
+                      {stat.value}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -61,7 +70,7 @@ export function HeroSection() {
             <div className="card-base overflow-hidden rounded-[36px] bg-[#D9E8CE] p-3 sm:p-4">
               <div className="relative min-h-[520px] overflow-hidden rounded-[28px] bg-[#153407]">
                 <Image
-                  src="https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?auto=format&fit=crop&w=1200&q=80"
+                  src="/images/hero-image.png"
                   alt="Kit hidroponik vertikal"
                   fill
                   className="object-cover opacity-90"
@@ -70,7 +79,10 @@ export function HeroSection() {
                 <div className="absolute inset-0 bg-gradient-to-t from-primary/50 via-primary/5 to-transparent" />
                 <div className="absolute bottom-6 left-6 right-6 rounded-[24px] border border-white/20 bg-white/12 p-4 text-white backdrop-blur-md">
                   <p className="text-sm font-semibold">Monitoring aktif 24/7</p>
-                  <p className="mt-1 text-sm text-white/80">Sensor memantau nutrisi, level air, dan suhu secara otomatis.</p>
+                  <p className="mt-1 text-sm text-white/80">
+                    Sensor memantau nutrisi, level air, dan suhu secara
+                    otomatis.
+                  </p>
                 </div>
               </div>
             </div>
