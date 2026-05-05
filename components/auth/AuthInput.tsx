@@ -1,4 +1,7 @@
+"use client";
+
 import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function AuthInput({
   label,
@@ -21,7 +24,10 @@ export default function AuthInput({
 }) {
   const [showPassword, setShowPassword] = useState(false);
 
-  const actualType = showToggle ? (showPassword ? "text" : "password") : type;
+  const isPasswordField = showToggle || type === "password";
+  const actualType = isPasswordField ? (showPassword ? "text" : "password") : type;
+  const inputClassName =
+    "h-full w-full bg-transparent text-sm text-[#20301d] outline-none placeholder:text-[#a1aa9d]";
 
   return (
     <label className="block">
@@ -32,21 +38,25 @@ export default function AuthInput({
       <div className="flex h-14 items-center rounded-2xl border border-[#e5e8e1] bg-[#eef1eb] px-4 transition focus-within:border-[#5e8e41] focus-within:bg-white">
         <span className="mr-3 text-lg text-[#9aa493] grayscale">{icon}</span>
         <input
+          key={actualType}
           type={actualType}
           name={name}
           value={value}
           onChange={onChange}
           placeholder={placeholder}
-          className="h-full w-full bg-transparent text-sm text-[#20301d] outline-none placeholder:text-[#a1aa9d]"
+          className={inputClassName}
         />
 
-        {showToggle && (
+        {isPasswordField && (
           <button
             type="button"
             onClick={() => setShowPassword((prev) => !prev)}
-            className="ml-3 text-sm text-[#8b9587] transition hover:text-[#274f14]"
+            className="ml-3 flex items-center text-lg text-[#8b9587] transition hover:text-[#274f14]"
+            title={showPassword ? "Sembunyikan password" : "Tampilkan password"}
+            aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}
+            aria-pressed={showPassword}
           >
-            {showPassword ? "Sembunyi" : "Lihat"}
+            {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
           </button>
         )}
       </div>

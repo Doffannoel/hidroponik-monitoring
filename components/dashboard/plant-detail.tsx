@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DashboardAppShell } from "@/components/dashboard/app-shell";
 import {
   Breadcrumbs,
@@ -16,128 +16,167 @@ import {
 
 import {
   Beaker,
-  Zap,
-  Thermometer,
+  Waves,
   Droplets,
   Package,
   RefreshCw,
 } from "lucide-react";
 
-import type { LucideIcon } from "lucide-react";
+import { apiGetBox, apiUpdateBox, apiGetDeviceHistory } from "@/lib/api";
+import type { Box, DeviceHistoryEntry, PlantType, FertilizerAmount } from "@/lib/types";
 
-interface Metric {
-  label: string;
-  icon: LucideIcon;
-  tone: "info" | "success" | "neutral" | "danger" | "warning";
-  value: string | number;
-  unit: string;
-  note: string;
+interface PlantDetailPageProps {
+  boxId: number;
 }
 
-interface HistoryItem {
-  title: string;
-  description: string;
-  icon: LucideIcon;
-  timestamp: string;
-}
+export function PlantDetailPage({ boxId }: PlantDetailPageProps) {
+  const [box, setBox] = useState<Box | null>(null);
+  const [history, setHistory] = useState<DeviceHistoryEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalLoading, setModalLoading] = useState(false);
+  const [modalError, setModalError] = useState("");
 
-interface PlantDetail {
-  breadcrumb: Array<{ label: string; href?: string }>;
-  title: string;
-  status: string;
-  metrics: Metric[];
-  history: HistoryItem[];
-}
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const boxData = await apiGetBox(boxId);
+        setBox(boxData);
 
-const plantDetailPage: PlantDetail = {
-  breadcrumb: [{ label: "Dashboard" }, { label: "Tanaman" }],
-  title: "Bayam",
-  status: "Sehat",
-  metrics: [
+        // Fetch device history if there's a device
+        const deviceId = boxData.devices?.[0]?.device_id;
+        if (deviceId) {
+          try {
+            const historyData = await apiGetDeviceHistory(deviceId, 50);
+            setHistory(historyData);
+          } catch {
+            // History fetch might fail if no data yet — that's ok
+          }
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Gagal memuat data.");
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, [boxId]);
+
+  const handleEditSubmit = async (values: PlantFormValues) => {
+    if (!box) return;
+    setModalLoading(true);
+    setModalError("");
+
+    try {
+      const updated = await apiUpdateBox(box.id, {
+        name: values.name || box.name,
+        plant_type: values.plantType as PlantType,
+        fertilizer_amount: values.fertilizer as FertilizerAmount,
+      });
+      setBox((prev) => (prev ? { ...prev, ...updated } : prev));
+      setIsModalOpen(false);
+    } catch (err) {
+      setModalError(err instanceof Error ? err.message : "Gagal menyimpan.");
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <DashboardAppShell currentPath="/list-tanaman">
+        <div className="mx-auto max-w-5xl rounded-[32px] bg-[#F4F7F2] p-6 sm:p-8">
+          <div className="animate-pulse space-y-6">
+            <div className="h-6 w-48 rounded bg-primary/8" />
+            <div className="h-12 w-64 rounded bg-primary/8" />
+            <div className="grid gap-5 sm:grid-cols-2">
+              {[1, 2, 3].map((i) => (
+                <SurfaceCard key={i} className="p-6">
+                  <div className="h-20 rounded bg-primary/5" />
+                </SurfaceCard>
+              ))}
+            </div>
+          </div>
+        </div>
+      </DashboardAppShell>
+    );
+  }
+
+  if (error || !box) {
+    return (
+      <DashboardAppShell currentPath="/list-tanaman">
+        <div className="mx-auto max-w-5xl rounded-[32px] bg-[#F4F7F2] p-6 sm:p-8">
+          <div className="rounded-[28px] bg-[#FBE8E6] px-6 py-5 text-[#D14D45]">
+            <p className="font-semibold">Gagal memuat data</p>
+            <p className="mt-1 text-sm opacity-75">{error || "Box tidak ditemukan."}</p>
+          </div>
+        </div>
+      </DashboardAppShell>
+    );
+  }
+
+  const latestSensor = box.devices?.[0]?.latest;
+  const plantLabel = box.plant_type.charAt(0).toUpperCase() + box.plant_type.slice(1);
+
+  const metrics = [
     {
       label: "pH",
       icon: Beaker,
-      tone: "info",
-      value: "6.5",
+      tone: "info" as const,
+      value: latestSensor?.ph !== null && latestSensor?.ph !== undefined ? String(latestSensor.ph) : "-",
       unit: "",
-      note: "Optimal",
+      note: latestSensor?.ph ? "Data sensor" : "Menunggu data",
     },
     {
-      label: "EC",
-      icon: Zap,
-      tone: "info",
-      value: "1.2",
-      unit: "mS/cm",
-      note: "Normal",
+      label: "TDS",
+      icon: Waves,
+      tone: "info" as const,
+      value: latestSensor?.tds !== null && latestSensor?.tds !== undefined ? String(latestSensor.tds) : "-",
+      unit: "PPM",
+      note: latestSensor?.tds ? "Data sensor" : "Menunggu data",
     },
     {
-      label: "Suhu",
-      icon: Thermometer,
-      tone: "success",
-      value: "25",
-      unit: "°C",
-      note: "Ideal",
-    },
-    {
-      label: "Kelembaban",
+      label: "Level Air",
       icon: Droplets,
-      tone: "success",
-      value: "65",
+      tone: "success" as const,
+      value: latestSensor?.water_level !== null && latestSensor?.water_level !== undefined ? String(latestSensor.water_level) : "-",
       unit: "%",
-      note: "Sehat",
+      note: latestSensor?.water_level ? "Data sensor" : "Menunggu data",
     },
-  ],
-  history: [
-    {
-      title: "Panen",
-      description: "Tanaman siap dipanen",
-      icon: Package,
-      timestamp: "2 hari lalu",
-    },
-    {
-      title: "Update",
-      description: "Data sensor diperbarui",
-      icon: RefreshCw,
-      timestamp: "1 jam lalu",
-    },
-  ],
-};
-
-export function PlantDetailPage() {
-  const [title, setTitle] = useState(plantDetailPage.title);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  ];
 
   return (
     <DashboardAppShell currentPath="/list-tanaman">
       <PlantFormModal
         open={isModalOpen}
         mode="edit"
+        loading={modalLoading}
+        error={modalError}
         values={{
-          name: title,
-          kitId: "123456",
-          image: "/images/Lettuce.png",
-          plantedAt: "",
-          plantType: "Bayam",
-          fertilizer: "5ml",
+          name: box.name,
+          kitId: box.device_id,
+          image: box.image_url || "/images/Lettuce.png",
+          plantedAt: box.start_date,
+          plantType: box.plant_type,
+          fertilizer: box.fertilizer_amount as "5ml" | "10ml",
         }}
         onClose={() => setIsModalOpen(false)}
-        onSubmit={(values: PlantFormValues) => {
-          setTitle(values.name || title);
-          setIsModalOpen(false);
-        }}
+        onSubmit={handleEditSubmit}
       />
       <div className="mx-auto max-w-5xl rounded-[32px] bg-[#F4F7F2] p-6 sm:p-8">
-        <Breadcrumbs
-          items={plantDetailPage.breadcrumb.map(
-            (item: { label: string }) => item.label,
-          )}
-        />
+        <Breadcrumbs items={["Dashboard", "Tanaman Saya", box.name]} />
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <h1 className="text-[44px] font-black tracking-tight text-primary">
-            {title}
-          </h1>
+          <div>
+            <h1 className="text-[44px] font-black tracking-tight text-primary">
+              {box.name}
+            </h1>
+            <p className="text-sm text-textSoft">
+              {plantLabel} · Device: {box.device_id} · Pupuk: {box.fertilizer_amount}
+            </p>
+          </div>
           <div className="flex items-center gap-3 self-start md:self-auto">
-            <ToneBadge tone="success">{plantDetailPage.status}</ToneBadge>
+            <ToneBadge tone="success">{plantLabel}</ToneBadge>
             <KebabButton
               ariaLabel="Edit plant"
               onClick={() => setIsModalOpen(true)}
@@ -146,7 +185,7 @@ export function PlantDetailPage() {
         </div>
         <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_220px]">
           <div className="grid gap-5 sm:grid-cols-2">
-            {plantDetailPage.metrics.map((metric: Metric) => (
+            {metrics.map((metric) => (
               <SurfaceCard key={metric.label} className="p-6">
                 <div className="flex items-center gap-3">
                   <MetricIcon icon={metric.icon} tone={metric.tone} />
@@ -172,40 +211,55 @@ export function PlantDetailPage() {
                   Live Plant Preview
                 </p>
                 <p className="text-lg font-semibold text-white">
-                  Bayam tumbuh sehat
+                  {plantLabel} — {box.name}
                 </p>
+                {latestSensor?.updated_at && (
+                  <p className="text-xs text-white/50">
+                    Terakhir update: {new Date(latestSensor.updated_at).toLocaleString("id-ID")}
+                  </p>
+                )}
               </div>
             </div>
           </div>
         </div>
+
+        {/* Sensor History */}
         <SurfaceCard className="mt-6 p-6 sm:p-7">
           <h2 className="text-[34px] font-black tracking-tight text-primary">
-            Riwayat
+            Riwayat Sensor
           </h2>
           <div className="mt-5 space-y-5">
-            {plantDetailPage.history.map((item: HistoryItem) => (
-              <div
-                key={item.title}
-                className="flex flex-col gap-3 border-b border-primary/8 pb-5 last:border-b-0 last:pb-0 sm:flex-row sm:items-start sm:justify-between"
-              >
-                <div className="flex items-start gap-4">
-                  <MetricIcon icon={item.icon} tone="neutral" />
-                  <div>
-                    <p className="font-semibold text-primary">{item.title}</p>
-                    <p className="mt-1 max-w-2xl text-sm text-textSoft">
-                      {item.description}
-                    </p>
+            {history.length === 0 ? (
+              <p className="text-sm text-textSoft">Belum ada riwayat sensor.</p>
+            ) : (
+              history.slice(0, 10).map((entry, index) => (
+                <div
+                  key={index}
+                  className="flex flex-col gap-3 border-b border-primary/8 pb-5 last:border-b-0 last:pb-0 sm:flex-row sm:items-start sm:justify-between"
+                >
+                  <div className="flex items-start gap-4">
+                    <MetricIcon icon={RefreshCw} tone="neutral" />
+                    <div>
+                      <p className="font-semibold text-primary">
+                        Data Sensor
+                      </p>
+                      <p className="mt-1 max-w-2xl text-sm text-textSoft">
+                        pH: {entry.ph ?? "-"} · TDS: {entry.tds ?? "-"} PPM · Air: {entry.water_level ?? "-"}%
+                      </p>
+                    </div>
                   </div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary/35">
+                    {new Date(entry.created_at).toLocaleString("id-ID")}
+                  </p>
                 </div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary/35">
-                  {item.timestamp}
-                </p>
-              </div>
-            ))}
+              ))
+            )}
           </div>
-          <button className="mt-6 text-sm font-bold uppercase tracking-[0.16em] text-primary/70">
-            View full history →
-          </button>
+          {history.length > 10 && (
+            <button className="mt-6 text-sm font-bold uppercase tracking-[0.16em] text-primary/70">
+              Lihat semua riwayat →
+            </button>
+          )}
         </SurfaceCard>
       </div>
     </DashboardAppShell>

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import Image from "next/image";
 import { X } from "lucide-react";
+import type { PlantType, FertilizerAmount } from "@/lib/types";
 
 export type PlantFormMode = "create" | "edit";
 
@@ -16,12 +17,22 @@ export type PlantFormValues = {
   fertilizer: "5ml" | "10ml";
 };
 
+const PLANT_TYPES: { value: PlantType; label: string }[] = [
+  { value: "selada", label: "Selada" },
+  { value: "bayam", label: "Bayam" },
+  { value: "kangkung", label: "Kangkung" },
+  { value: "tomat", label: "Tomat" },
+  { value: "cabai", label: "Cabai" },
+  { value: "strawberry", label: "Strawberry" },
+  { value: "basil", label: "Basil" },
+];
+
 const defaultValues: PlantFormValues = {
   name: "",
   kitId: "",
   image: "/images/Lettuce.png",
   plantedAt: "",
-  plantType: "Bayam",
+  plantType: "bayam",
   fertilizer: "5ml",
 };
 
@@ -31,12 +42,16 @@ export function PlantFormModal({
   values,
   onClose,
   onSubmit,
+  loading = false,
+  error = "",
 }: {
   open: boolean;
   mode: PlantFormMode;
   values?: Partial<PlantFormValues>;
   onClose: () => void;
   onSubmit: (values: PlantFormValues) => void;
+  loading?: boolean;
+  error?: string;
 }) {
   const [form, setForm] = useState<PlantFormValues>(defaultValues);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -51,7 +66,7 @@ export function PlantFormModal({
       kitId: values?.kitId ?? "",
       image: values?.image ?? "/images/Lettuce.png",
       plantedAt: values?.plantedAt ?? "",
-      plantType: values?.plantType ?? "Bayam",
+      plantType: values?.plantType ?? "bayam",
       fertilizer: values?.fertilizer ?? "5ml",
     });
   }, [open, values]);
@@ -160,6 +175,12 @@ export function PlantFormModal({
         </div>
 
         <form className="mt-5 space-y-4" onSubmit={handleSubmit}>
+          {error && (
+            <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
+              {error}
+            </div>
+          )}
+
           <label className="block">
             <span className="mb-1.5 block text-[13px] text-[#3C3C3C]">
               Nama Kontainer
@@ -174,13 +195,14 @@ export function PlantFormModal({
 
           <label className="block">
             <span className="mb-1.5 block text-[13px] text-[#3C3C3C]">
-              ID Kit
+              Device ID
             </span>
             <input
               value={form.kitId}
               onChange={(event) => updateField("kitId", event.target.value)}
               className="h-10 w-full rounded-[6px] border border-[#C7CFD7] bg-white px-3.5 text-sm outline-none transition focus:border-[#36561B] focus:ring-2 focus:ring-[#36561B]/10"
-              placeholder="123456"
+              placeholder="node1"
+              disabled={mode === "edit"}
             />
           </label>
 
@@ -249,10 +271,11 @@ export function PlantFormModal({
               onChange={(event) => updateField("plantType", event.target.value)}
               className="h-11 w-full rounded-[6px] border border-[#C7CFD7] bg-white px-4 text-sm outline-none transition focus:border-[#36561B] focus:ring-2 focus:ring-[#36561B]/10"
             >
-              <option>Bayam</option>
-              <option>Selada</option>
-              <option>Pakcoy</option>
-              <option>Kangkung</option>
+              {PLANT_TYPES.map((pt) => (
+                <option key={pt.value} value={pt.value}>
+                  {pt.label}
+                </option>
+              ))}
             </select>
           </label>
 
@@ -278,9 +301,10 @@ export function PlantFormModal({
 
           <button
             type="submit"
-            className="mt-1 h-12 w-full rounded-full bg-[linear-gradient(180deg,#2D5A0E_0%,#24480B_100%)] text-sm font-semibold text-white shadow-[0_16px_30px_rgba(37,76,13,0.25)] transition hover:opacity-95"
+            disabled={loading}
+            className="mt-1 h-12 w-full rounded-full bg-[linear-gradient(180deg,#2D5A0E_0%,#24480B_100%)] text-sm font-semibold text-white shadow-[0_16px_30px_rgba(37,76,13,0.25)] transition hover:opacity-95 disabled:opacity-60"
           >
-            {buttonLabel}
+            {loading ? "Memproses..." : buttonLabel}
           </button>
         </form>
       </div>

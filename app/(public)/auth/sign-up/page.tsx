@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import AuthShell from "@/components/auth/AuthSell";
 import AuthBrandPanel from "@/components/auth/AuthBrandPanel";
 import AuthCard from "@/components/auth/AuthCard";
@@ -9,6 +10,7 @@ import AuthInput from "@/components/auth/AuthInput";
 import PasswordStrength from "@/components/auth/PasswordStrength";
 import AuthDivider from "@/components/auth/AuthDivider";
 import SocialGoogleButton from "@/components/auth/SocialGoogleButton";
+import { apiRegister } from "@/lib/api";
 
 export default function SignUp() {
   const [form, setForm] = useState({
@@ -18,6 +20,9 @@ export default function SignUp() {
     confirmPassword: "",
     agree: false,
   });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, checked, type } = e.target;
@@ -27,16 +32,46 @@ export default function SignUp() {
     }));
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+
+    if (form.password !== form.confirmPassword) {
+      setError("Password dan konfirmasi password tidak sama.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      await apiRegister({
+        email: form.email,
+        full_name: form.fullName,
+        password: form.password,
+        confirm_password: form.confirmPassword,
+      });
+      router.push("/auth/sign-in");
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Registrasi gagal. Coba lagi."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <AuthShell
       left={<AuthBrandPanel />}
       right={
         <AuthCard title="Daftar" subtitle="Buat akun baru Anda">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-            }}
-          >
+          <form onSubmit={handleSubmit}>
+            {error && (
+              <div className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
+                {error}
+              </div>
+            )}
+
             <AuthInput
               label="Nama Lengkap"
               name="fullName"
@@ -93,7 +128,7 @@ export default function SignUp() {
                   href="/syarat-ketentuan"
                   className="font-medium text-[#2b5515] underline underline-offset-2"
                 >
-                  Syarat & Ketentuan
+                  Syarat &amp; Ketentuan
                 </Link>{" "}
                 Tikus Kota.
               </span>
@@ -101,9 +136,10 @@ export default function SignUp() {
 
             <button
               type="submit"
-              className="h-14 w-full rounded-full bg-[linear-gradient(90deg,#214d10_0%,#3d7120_100%)] text-sm font-bold text-white shadow-lg transition hover:opacity-95"
+              disabled={loading}
+              className="h-14 w-full rounded-full bg-[linear-gradient(90deg,#214d10_0%,#3d7120_100%)] text-sm font-bold text-white shadow-lg transition hover:opacity-95 disabled:opacity-60"
             >
-              Buat Akun
+              {loading ? "Memproses..." : "Buat Akun"}
             </button>
 
             <AuthDivider text="ATAU DAFTAR DENGAN" />

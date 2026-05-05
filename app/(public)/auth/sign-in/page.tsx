@@ -2,15 +2,22 @@
 
 import Link from "next/link";
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import AuthShell from "@/components/auth/AuthSell";
 import AuthBrandPanel from "@/components/auth/AuthBrandPanel";
 import AuthCard from "@/components/auth/AuthCard";
 import AuthInput from "@/components/auth/AuthInput";
 import AuthDivider from "@/components/auth/AuthDivider";
 import SocialGoogleButton from "@/components/auth/SocialGoogleButton";
+import { apiLogin } from "@/lib/api";
+import { useAuth } from "@/lib/auth-context";
 
 export default function SignIn() {
   const [form, setForm] = useState({ email: "", password: "", agree: false });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const { onLoginSuccess } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -20,9 +27,20 @@ export default function SignIn() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle sign-in logic here
+    setError("");
+    setLoading(true);
+
+    try {
+      await apiLogin({ email: form.email, password: form.password });
+      onLoginSuccess();
+      router.push("/dashboard");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Login gagal. Coba lagi.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -31,6 +49,12 @@ export default function SignIn() {
       right={
         <AuthCard title="Masuk" subtitle="Silakan masuk ke akun Anda">
           <form onSubmit={handleSubmit} className="space-y-5">
+            {error && (
+              <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
+                {error}
+              </div>
+            )}
+
             <AuthInput
               label="Email"
               type="email"
@@ -65,7 +89,7 @@ export default function SignIn() {
                   href="/syarat-ketentuan"
                   className="font-medium text-[#2b5515] underline underline-offset-2"
                 >
-                  Syarat & Ketentuan
+                  Syarat &amp; Ketentuan
                 </Link>{" "}
                 Innofarm
               </span>
@@ -73,9 +97,10 @@ export default function SignIn() {
 
             <button
               type="submit"
-              className="h-14 w-full rounded-full bg-[linear-gradient(90deg,#214d10_0%,#3d7120_100%)] text-sm font-bold text-white shadow-lg transition hover:opacity-95"
+              disabled={loading}
+              className="h-14 w-full rounded-full bg-[linear-gradient(90deg,#214d10_0%,#3d7120_100%)] text-sm font-bold text-white shadow-lg transition hover:opacity-95 disabled:opacity-60"
             >
-              Masuk
+              {loading ? "Memproses..." : "Masuk"}
             </button>
 
             <AuthDivider text="ATAU DAFTAR DENGAN" />

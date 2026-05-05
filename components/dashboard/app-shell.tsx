@@ -4,8 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import clsx from "clsx";
 import type { LucideIcon } from "lucide-react";
-import { Bell, Search, UserCircle2 } from "lucide-react";
+import { LogOut, UserCircle2 } from "lucide-react";
 import { appNavItems, topNavLinks } from "@/data/dashboard-content";
+import { useAuth } from "@/lib/auth-context";
 
 export function DashboardAppShell({
   currentPath,
@@ -18,6 +19,8 @@ export function DashboardAppShell({
   subtitle?: string;
   children: React.ReactNode;
 }) {
+  const { logout, isAuthenticated } = useAuth();
+
   return (
     <div className="min-h-screen bg-surface">
       <div className="mx-auto flex min-h-screen max-w-[1440px] bg-[#EEF2EC]">
@@ -62,6 +65,21 @@ export function DashboardAppShell({
               },
             )}
           </nav>
+
+          {/* Logout button at bottom of sidebar */}
+          {isAuthenticated && (
+            <div className="mt-auto pt-8">
+              <button
+                onClick={logout}
+                className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-red-500/70 transition hover:bg-red-50 hover:text-red-600"
+              >
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-red-50">
+                  <LogOut className="h-4 w-4" />
+                </span>
+                LOGOUT
+              </button>
+            </div>
+          )}
         </aside>
         <div className="flex min-w-0 flex-1 flex-col">
           <header className="flex flex-wrap items-center justify-between gap-4 px-6 py-5 sm:px-8 lg:px-10">
@@ -80,6 +98,16 @@ export function DashboardAppShell({
               ))}
             </nav>
             <div className="flex items-center gap-3">
+              {isAuthenticated && (
+                <button
+                  onClick={logout}
+                  className="flex h-11 items-center gap-2 rounded-full px-4 text-sm font-medium text-primary/60 transition hover:bg-red-50 hover:text-red-600 lg:hidden"
+                  title="Logout"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span className="hidden sm:inline">Logout</span>
+                </button>
+              )}
               <button className="flex h-11 w-11 items-center justify-center rounded-full text-primary">
                 <UserCircle2 className="h-5 w-5" />
               </button>
