@@ -17,7 +17,7 @@ import {
   type PlantFormValues,
 } from "@/components/dashboard/plant-form-modal";
 import { FlaskConical, Droplets, Waves } from "lucide-react";
-import { apiGetBoxes, apiCreateBox, apiUpdateBox } from "@/lib/api";
+import { apiGetBoxes, apiCreateBox, apiUpdateBox, apiUploadBoxImage } from "@/lib/api";
 import type { Box, PlantType, FertilizerAmount } from "@/lib/types";
 
 export function PlantsListPage() {
@@ -72,6 +72,13 @@ export function PlantsListPage() {
           plant_type: values.plantType as PlantType,
           fertilizer_amount: values.fertilizer as FertilizerAmount,
         });
+
+        // Handle image upload if a new file was selected
+        if (values.imageFile) {
+          const { image_url } = await apiUploadBoxImage(activeBox.id, values.imageFile);
+          updated.image_url = image_url;
+        }
+
         setBoxes((current) =>
           current.map((box) => (box.id === activeBox.id ? { ...box, ...updated } : box))
         );
@@ -84,11 +91,35 @@ export function PlantsListPage() {
           plant_type: values.plantType as PlantType,
           fertilizer_amount: values.fertilizer as FertilizerAmount,
         });
+
+        // Handle image upload if a new file was selected
+        if (values.imageFile) {
+          const { image_url } = await apiUploadBoxImage(newBox.id, values.imageFile);
+          newBox.image_url = image_url;
+        }
+
         setBoxes((current) => [...current, newBox]);
       }
       closeModal();
     } catch (err) {
       setModalError(err instanceof Error ? err.message : "Gagal menyimpan.");
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (modalState?.mode !== "edit" || !activeBox) return;
+    if (!confirm("Apakah Anda yakin ingin menghapus kontainer ini?")) return;
+    
+    setModalLoading(true);
+    setModalError("");
+    try {
+      await import("@/lib/api").then((m) => m.apiDeleteBox(activeBox.id));
+      setBoxes((current) => current.filter((box) => box.id !== activeBox.id));
+      closeModal();
+    } catch (err) {
+      setModalError(err instanceof Error ? err.message : "Gagal menghapus.");
     } finally {
       setModalLoading(false);
     }
@@ -168,6 +199,7 @@ export function PlantsListPage() {
         }
         onClose={closeModal}
         onSubmit={handleSubmit}
+        onDelete={handleDelete}
       />
       <div className="mx-auto max-w-5xl rounded-[32px] bg-[#F4F7F2] p-6 sm:p-8">
         <Breadcrumbs items={["Dashboard", "Tanaman Saya"]} />

@@ -16,6 +16,15 @@ export interface LoginPayload {
   password: string;
 }
 
+export interface User {
+  id: number;
+  email: string;
+  full_name: string;
+  avatar_url: string | null;
+  has_password: boolean;
+  is_staff: boolean;
+}
+
 // ─── Products / Boxes ────────────────────────────────────────────────────────
 
 export type PlantType =

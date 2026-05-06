@@ -12,6 +12,7 @@ export type PlantFormValues = {
   name: string;
   kitId: string;
   image: string;
+  imageFile?: File;
   plantedAt: string;
   plantType: string;
   fertilizer: "5ml" | "10ml";
@@ -42,6 +43,7 @@ export function PlantFormModal({
   values,
   onClose,
   onSubmit,
+  onDelete,
   loading = false,
   error = "",
 }: {
@@ -50,6 +52,7 @@ export function PlantFormModal({
   values?: Partial<PlantFormValues>;
   onClose: () => void;
   onSubmit: (values: PlantFormValues) => void;
+  onDelete?: () => void;
   loading?: boolean;
   error?: string;
 }) {
@@ -115,6 +118,7 @@ export function PlantFormModal({
         "image",
         typeof reader.result === "string" ? reader.result : "",
       );
+      updateField("imageFile", file);
     };
     reader.readAsDataURL(file);
   };
@@ -299,13 +303,25 @@ export function PlantFormModal({
             </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="mt-1 h-12 w-full rounded-full bg-[linear-gradient(180deg,#2D5A0E_0%,#24480B_100%)] text-sm font-semibold text-white shadow-[0_16px_30px_rgba(37,76,13,0.25)] transition hover:opacity-95 disabled:opacity-60"
-          >
-            {loading ? "Memproses..." : buttonLabel}
-          </button>
+          <div className="flex flex-col gap-2 mt-2">
+            <button
+              type="submit"
+              disabled={loading}
+              className="h-12 w-full rounded-full bg-[linear-gradient(180deg,#2D5A0E_0%,#24480B_100%)] text-sm font-semibold text-white shadow-[0_16px_30px_rgba(37,76,13,0.25)] transition hover:opacity-95 disabled:opacity-60"
+            >
+              {loading ? "Memproses..." : buttonLabel}
+            </button>
+            {mode === "edit" && onDelete && (
+              <button
+                type="button"
+                onClick={onDelete}
+                disabled={loading}
+                className="h-12 w-full rounded-full bg-[#FBE8E6] text-sm font-semibold text-[#D14D45] transition hover:bg-[#fad8d5] disabled:opacity-60"
+              >
+                Hapus Kontainer
+              </button>
+            )}
+          </div>
         </form>
       </div>
     </div>

@@ -9,7 +9,7 @@ import {
   ToneBadge,
 } from "@/components/dashboard/shared";
 import { BookOpen, Gauge, Beaker, AlertTriangle, Calendar, Droplets, FlaskConical } from "lucide-react";
-import { apiGetBoxes, apiGetAlerts } from "@/lib/api";
+import { apiGetBoxes, apiGetAlerts, apiResolveAlert } from "@/lib/api";
 import type { Box, Alert } from "@/lib/types";
 
 export function DashboardOverview() {
@@ -39,6 +39,16 @@ export function DashboardOverview() {
   // Compute dynamic metrics
   const activeBoxCount = boxes.length;
   const activeAlertCount = alerts.length;
+
+  const handleResolveAlert = async (alertId: number) => {
+    try {
+      await apiResolveAlert(alertId);
+      setAlerts((prev) => prev.filter((a) => a.id !== alertId));
+    } catch (err) {
+      console.error("Failed to resolve alert", err);
+      alert("Gagal menyelesaikan alert.");
+    }
+  };
 
   // Calculate days since earliest plant
   const daysSincePlant = boxes.length > 0
@@ -110,6 +120,7 @@ export function DashboardOverview() {
     const isPh = alert.alert_type.startsWith("ph");
 
     return {
+      id: alert.id,
       title: `${boxName} — ${label} (${alert.value})`,
       description: `Threshold: ${alert.threshold}. Cek dan sesuaikan segera.`,
       cta: "Lihat Detail",
@@ -206,7 +217,7 @@ export function DashboardOverview() {
 
       {/* Alerts Section */}
       <div className="mt-7">
-        <h2 className="text-[34px] font-black tracking-tight text-primary">
+        <h2 className="text-2xl md:text-[34px] font-black tracking-tight text-primary">
           Alerts
         </h2>
         <div className="mt-4 space-y-4">
@@ -231,7 +242,7 @@ export function DashboardOverview() {
                   ].join(" ")}
                 >
                   <div className="flex items-start gap-4">
-                    <span className="mt-1 flex h-10 w-10 items-center justify-center rounded-full bg-white/70">
+                    <span className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/70">
                       <Icon className="h-5 w-5" />
                     </span>
                     <div>
@@ -241,14 +252,22 @@ export function DashboardOverview() {
                       </p>
                     </div>
                   </div>
-                  {alert.boxId && (
-                    <Link
-                      href={`/detail-tanaman/${alert.boxId}`}
-                      className="text-sm font-semibold md:whitespace-nowrap"
+                  <div className="flex items-center gap-3">
+                    {alert.boxId && (
+                      <Link
+                        href={`/detail-tanaman/${alert.boxId}`}
+                        className="text-sm font-semibold md:whitespace-nowrap"
+                      >
+                        {alert.cta}
+                      </Link>
+                    )}
+                    <button
+                      onClick={() => handleResolveAlert(alert.id)}
+                      className="rounded-full bg-white/50 px-3 py-1.5 text-xs font-semibold text-primary transition hover:bg-white/80 shrink-0"
                     >
-                      {alert.cta}
-                    </Link>
-                  )}
+                      Tandai Selesai
+                    </button>
+                  </div>
                 </div>
               );
             })
@@ -259,7 +278,7 @@ export function DashboardOverview() {
       {/* Bottom section */}
       <div className="mt-7 grid gap-6 xl:grid-cols-[minmax(0,1fr)_280px]">
         <div>
-          <h2 className="text-[34px] font-black tracking-tight text-primary">
+          <h2 className="text-2xl md:text-[34px] font-black tracking-tight text-primary">
             Kontainer Terbaru
           </h2>
           <SurfaceCard className="mt-4 p-6">
@@ -304,7 +323,7 @@ export function DashboardOverview() {
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10">
             <BookOpen className="h-6 w-6 text-white/70" />
           </div>
-          <h3 className="mt-8 text-4xl font-black leading-tight tracking-tight">
+          <h3 className="mt-8 text-3xl md:text-4xl font-black leading-tight tracking-tight">
             Tahukah Kamu?
           </h3>
           <p className="mt-4 text-sm leading-7 text-white/75">

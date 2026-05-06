@@ -2,6 +2,7 @@ import type {
   AuthTokens,
   LoginPayload,
   RegisterPayload,
+  User,
   Box,
   BoxCreatePayload,
   BoxUpdatePayload,
@@ -101,6 +102,15 @@ export async function apiLogin(payload: LoginPayload): Promise<AuthTokens> {
   return tokens;
 }
 
+export async function apiGoogleLogin(idToken: string): Promise<AuthTokens> {
+  const tokens = await apiFetch<AuthTokens>("/api/auth/google/", {
+    method: "POST",
+    body: JSON.stringify({ id_token: idToken }),
+  });
+  setTokens(tokens);
+  return tokens;
+}
+
 export async function apiRegister(
   payload: RegisterPayload
 ): Promise<Record<string, unknown>> {
@@ -120,6 +130,10 @@ export async function apiLogout(): Promise<void> {
   } finally {
     clearTokens();
   }
+}
+
+export async function apiGetMe(): Promise<User> {
+  return apiFetch<User>("/api/auth/me/");
 }
 
 // ─── Boxes API ───────────────────────────────────────────────────────────────

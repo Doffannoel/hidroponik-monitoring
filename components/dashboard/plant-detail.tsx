@@ -22,14 +22,17 @@ import {
   RefreshCw,
 } from "lucide-react";
 
-import { apiGetBox, apiUpdateBox, apiGetDeviceHistory } from "@/lib/api";
-import type { Box, DeviceHistoryEntry, PlantType, FertilizerAmount } from "@/lib/types";
+import { apiGetBox, apiUpdateBox, apiGetDeviceHistory, apiUploadBoxImage, createDeviceWebSocket } from "@/lib/api";
+import type { Box, DeviceHistoryEntry, PlantType, FertilizerAmount, WsMessage } from "@/lib/types";
+
+import { useRouter } from "next/navigation";
 
 interface PlantDetailPageProps {
   boxId: number;
 }
 
 export function PlantDetailPage({ boxId }: PlantDetailPageProps) {
+  const router = useRouter();
   const [box, setBox] = useState<Box | null>(null);
   const [history, setHistory] = useState<DeviceHistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,6 +42,8 @@ export function PlantDetailPage({ boxId }: PlantDetailPageProps) {
   const [modalError, setModalError] = useState("");
 
   useEffect(() => {
+    let ws: WebSocket | null = null;
+
     async function fetchData() {
       try {
         const boxData = await apiGetBox(boxId);
@@ -53,6 +58,38 @@ export function PlantDetailPage({ boxId }: PlantDetailPageProps) {
           } catch {
             // History fetch might fail if no data yet — that's ok
           }
+
+          // Setup WebSocket
+          ws = createDeviceWebSocket(deviceId);
+          if (ws) {
+            ws.onmessage = (event) => {
+              try {
+                const data = JSON.parse(event.data) as WsMessage;
+                if (data.type === "sensor") {
+                  setBox((prev) => {
+                    if (!prev) return prev;
+                    
+                    const newBox = { ...prev };
+                    if (!newBox.devices || newBox.devices.length === 0) return newBox;
+                    
+                    const device = { ...newBox.devices[0] };
+                    device.latest = {
+                      ...device.latest,
+                      ph: data.sensor_type === "ph" ? data.value : device.latest?.ph ?? null,
+                      tds: data.sensor_type === "tds" ? data.value : device.latest?.tds ?? null,
+                      water_level: data.sensor_type === "waterlevel" ? data.value : device.latest?.water_level ?? null,
+                      updated_at: new Date().toISOString()
+                    };
+                    
+                    newBox.devices[0] = device;
+                    return newBox;
+                  });
+                }
+              } catch (e) {
+                console.error("WS parse error", e);
+              }
+            };
+          }
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Gagal memuat data.");
@@ -61,6 +98,12 @@ export function PlantDetailPage({ boxId }: PlantDetailPageProps) {
       }
     }
     fetchData();
+
+    return () => {
+      if (ws) {
+        ws.close();
+      }
+    };
   }, [boxId]);
 
   const handleEditSubmit = async (values: PlantFormValues) => {
@@ -74,11 +117,32 @@ export function PlantDetailPage({ boxId }: PlantDetailPageProps) {
         plant_type: values.plantType as PlantType,
         fertilizer_amount: values.fertilizer as FertilizerAmount,
       });
+
+      if (values.imageFile) {
+        const { image_url } = await apiUploadBoxImage(box.id, values.imageFile);
+        updated.image_url = image_url;
+      }
+
       setBox((prev) => (prev ? { ...prev, ...updated } : prev));
       setIsModalOpen(false);
     } catch (err) {
       setModalError(err instanceof Error ? err.message : "Gagal menyimpan.");
     } finally {
+      setModalLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!box) return;
+    if (!confirm("Apakah Anda yakin ingin menghapus kontainer ini?")) return;
+    
+    setModalLoading(true);
+    setModalError("");
+    try {
+      await import("@/lib/api").then((m) => m.apiDeleteBox(box.id));
+      router.push("/list-tanaman");
+    } catch (err) {
+      setModalError(err instanceof Error ? err.message : "Gagal menghapus.");
       setModalLoading(false);
     }
   };
@@ -163,12 +227,13 @@ export function PlantDetailPage({ boxId }: PlantDetailPageProps) {
         }}
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleEditSubmit}
+        onDelete={handleDelete}
       />
       <div className="mx-auto max-w-5xl rounded-[32px] bg-[#F4F7F2] p-6 sm:p-8">
         <Breadcrumbs items={["Dashboard", "Tanaman Saya", box.name]} />
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-[44px] font-black tracking-tight text-primary">
+            <h1 className="text-3xl md:text-[44px] font-black tracking-tight text-primary">
               {box.name}
             </h1>
             <p className="text-sm text-textSoft">

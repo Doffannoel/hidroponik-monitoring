@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import clsx from "clsx";
@@ -7,6 +8,7 @@ import type { LucideIcon } from "lucide-react";
 import { LogOut, UserCircle2 } from "lucide-react";
 import { appNavItems, topNavLinks } from "@/data/dashboard-content";
 import { useAuth } from "@/lib/auth-context";
+import { ProfileModal } from "@/components/dashboard/profile-modal";
 
 export function DashboardAppShell({
   currentPath,
@@ -20,9 +22,14 @@ export function DashboardAppShell({
   children: React.ReactNode;
 }) {
   const { logout, isAuthenticated } = useAuth();
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-surface">
+      <ProfileModal
+        open={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+      />
       <div className="mx-auto flex min-h-screen max-w-[1440px] bg-[#EEF2EC]">
         <aside className="hidden w-[248px] border-r border-primary/6 bg-[#E9EEE7] px-7 py-5 lg:block">
           <Link href="/" className="block w-fit">
@@ -83,7 +90,16 @@ export function DashboardAppShell({
         </aside>
         <div className="flex min-w-0 flex-1 flex-col">
           <header className="flex flex-wrap items-center justify-between gap-4 px-6 py-5 sm:px-8 lg:px-10">
-            <nav className="flex flex-wrap items-center gap-6 text-sm text-primary/65">
+            <Link href="/" className="block lg:hidden">
+              <Image
+                src="/images/logo.png"
+                alt="Logo perusahaan"
+                width={140}
+                height={40}
+                className="h-12 w-auto object-contain"
+              />
+            </Link>
+            <nav className="hidden flex-wrap items-center gap-6 text-sm text-primary/65 lg:flex">
               {topNavLinks.map((item: { label: string; href: string }) => (
                 <Link
                   key={item.href}
@@ -108,7 +124,11 @@ export function DashboardAppShell({
                   <span className="hidden sm:inline">Logout</span>
                 </button>
               )}
-              <button className="flex h-11 w-11 items-center justify-center rounded-full text-primary">
+              <button 
+                onClick={() => setIsProfileModalOpen(true)}
+                className="flex h-11 w-11 items-center justify-center rounded-full text-primary hover:bg-white/50 transition"
+                aria-label="Buka Profil"
+              >
                 <UserCircle2 className="h-5 w-5" />
               </button>
             </div>
@@ -116,7 +136,7 @@ export function DashboardAppShell({
           {(title || subtitle) && (
             <div className="px-6 pb-2 sm:px-8 lg:px-10">
               {title ? (
-                <h1 className="text-[40px] font-black tracking-tight text-primary">
+                <h1 className="text-3xl md:text-[40px] font-black tracking-tight text-primary">
                   {title}
                 </h1>
               ) : null}
@@ -125,11 +145,43 @@ export function DashboardAppShell({
               ) : null}
             </div>
           )}
-          <main className="flex-1 px-6 pb-8 sm:px-8 lg:px-10 lg:pb-10">
+          <main className="flex-1 px-6 pb-24 sm:px-8 lg:px-10 lg:pb-10">
             {children}
           </main>
         </div>
       </div>
+
+      {/* Mobile Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around border-t border-primary/10 bg-white/90 pb-safe pt-2 backdrop-blur-md lg:hidden">
+        {appNavItems.map(
+          (item: { label: string; href: string; icon: LucideIcon }) => {
+            const Icon = item.icon;
+            const active = currentPath === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={clsx(
+                  "flex flex-col items-center gap-1 px-4 py-2 text-[10px] font-bold uppercase tracking-wider transition",
+                  active
+                    ? "text-primary"
+                    : "text-primary/40 hover:text-primary/80",
+                )}
+              >
+                <span
+                  className={clsx(
+                    "mb-1 flex h-10 w-10 items-center justify-center rounded-full transition-colors",
+                    active ? "bg-[#EBF0E6] text-primary" : "bg-transparent",
+                  )}
+                >
+                  <Icon className="h-5 w-5" />
+                </span>
+                {item.label}
+              </Link>
+            );
+          },
+        )}
+      </nav>
     </div>
   );
 }
