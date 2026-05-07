@@ -9,6 +9,7 @@ import {
   Breadcrumbs,
   KebabButton,
   MetricIcon,
+  StatusPopup,
   SurfaceCard,
   ToneBadge,
 } from "@/components/dashboard/shared";
@@ -29,6 +30,7 @@ export function PlantsListPage() {
   >(null);
   const [modalLoading, setModalLoading] = useState(false);
   const [modalError, setModalError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   // Fetch boxes from API
   useEffect(() => {
@@ -99,6 +101,7 @@ export function PlantsListPage() {
         }
 
         setBoxes((current) => [...current, newBox]);
+        setSuccessMessage("Kontainer berhasil ditambahkan.");
       }
       closeModal();
     } catch (err) {
@@ -176,6 +179,12 @@ export function PlantsListPage() {
 
   return (
     <DashboardAppShell currentPath="/list-tanaman">
+      <StatusPopup
+        open={successMessage.length > 0}
+        title="Kontainer berhasil ditambahkan"
+        message={successMessage}
+        onClose={() => setSuccessMessage("")}
+      />
       <PlantFormModal
         open={modalState !== null}
         mode={modalState?.mode === "edit" ? "edit" : "create"}

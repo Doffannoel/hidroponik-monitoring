@@ -1,6 +1,6 @@
 import clsx from 'clsx';
 import type { LucideIcon } from 'lucide-react';
-import { Pencil } from 'lucide-react';
+import { CheckCircle2, Pencil } from 'lucide-react';
 
 export function Breadcrumbs({ items }: { items: string[] }) {
   return <div className="mb-3 flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-primary/35">{items.map((item, index) => <div key={item + index} className="flex items-center gap-2">{index > 0 ? <span>•</span> : null}<span>{item}</span></div>)}</div>;
@@ -36,5 +36,55 @@ export function KebabButton({
     >
       <Pencil className="h-4 w-4" />
     </button>
+  );
+}
+
+export function StatusPopup({
+  open,
+  title,
+  message,
+  onClose,
+}: {
+  open: boolean;
+  title: string;
+  message: string;
+  onClose: () => void;
+}) {
+  if (!open) {
+    return null;
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/45 p-4"
+      onClick={onClose}
+      role="presentation"
+    >
+      <div
+        className="w-full max-w-sm rounded-[28px] bg-[#F7FAF5] p-6 text-center shadow-[0_24px_80px_rgba(0,0,0,0.2)]"
+        onClick={(event) => event.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="status-popup-title"
+      >
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#E3F4D6] text-[#2D5B0D]">
+          <CheckCircle2 className="h-8 w-8" />
+        </div>
+        <h3
+          id="status-popup-title"
+          className="mt-4 text-2xl font-black tracking-tight text-primary"
+        >
+          {title}
+        </h3>
+        <p className="mt-2 text-sm leading-6 text-textSoft">{message}</p>
+        <button
+          type="button"
+          onClick={onClose}
+          className="mt-6 inline-flex h-11 w-full items-center justify-center rounded-full bg-[linear-gradient(180deg,#2D5A0E_0%,#24480B_100%)] px-5 text-sm font-semibold text-white shadow-[0_16px_30px_rgba(37,76,13,0.25)] transition hover:opacity-95"
+        >
+          Tutup
+        </button>
+      </div>
+    </div>
   );
 }
